@@ -32,9 +32,18 @@ public class BookDatabase {
                 "isbn VARCHAR(50) NOT NULL UNIQUE, " +
                 "publisher VARCHAR(255) NOT NULL)";
 
+        // Дополнительная таблица для связи пользователей с книгами
+        String createUserBooksTable = "CREATE TABLE IF NOT EXISTS user_books (" +
+                "user_id INT NOT NULL, " +
+                "book_id INT NOT NULL, " +
+                "PRIMARY KEY (user_id, book_id), " +
+                "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, " +
+                "FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE)";
+
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(createUsersTable);
             stmt.execute(createBooksTable);
+            stmt.execute(createUserBooksTable); // Создаем таблицу связей
         } catch (SQLException e) {
             System.out.println("Ошибка при создании таблиц: " + e.getMessage());
         }
@@ -54,7 +63,7 @@ public class BookDatabase {
             if (rowsAffected > 0) {
                 System.out.println("Новый пользователь добавлен: " + name + " " + surname);
             } else {
-                System.out.println("Пользователь с телефоном " + phone + " уже существует.");
+                System.out.println("\nПользователь с телефоном " + phone + " уже существует.");
             }
         } catch (SQLException e) {
             System.out.println("Ошибка при добавлении пользователя: " + e.getMessage());
@@ -81,6 +90,87 @@ public class BookDatabase {
         } catch (SQLException e) {
             System.out.println("Ошибка при добавлении книги: " + e.getMessage());
         }
+    }
+
+    // Вставка связи между пользователем и книгой
+    private static void insertUserBook(Connection conn, int userId, int bookId) {
+        String insertUserBook = "INSERT INTO user_books (user_id, book_id) VALUES (?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(insertUserBook)) {
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, bookId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при вставке связи пользователя с книгой: " + e.getMessage());
+        }
+    }
+
+    // Метод для добавления нового пользователя
+    public static void addUser(String name, String surname, String phone, boolean subscribed) {
+        try (Connection connection = connect()) {
+            assert connection != null;
+            insertUserIfNotExists(connection, name, surname, phone, subscribed);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Метод для добавления книги
+    public static void addBook(String bookName, String author, int publishingYear, String isbn, String publisher) {
+        try (Connection connection = connect()) {
+            assert connection != null;
+            insertBookIfNotExists(connection, bookName, author, publishingYear, isbn, publisher);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Метод для связывания пользователя с книгой
+    public static void linkUserWithBook(String phone, String isbn) {
+        // Находим user_id по телефону
+        String getUserIdQuery = "SELECT id FROM users WHERE phone = ?";
+        String getBookIdQuery = "SELECT id FROM books WHERE isbn = ?";
+
+        try (Connection connection = connect()) {
+            // Получаем user_id по номеру телефона
+            assert connection != null;
+            PreparedStatement userStmt = connection.prepareStatement(getUserIdQuery);
+            userStmt.setString(1, phone);
+            var userResult = userStmt.executeQuery();
+            if (userResult.next()) {
+                int userId = userResult.getInt("id");
+
+                // Получаем book_id по ISBN
+                PreparedStatement bookStmt = connection.prepareStatement(getBookIdQuery);
+                bookStmt.setString(1, isbn);
+                var bookResult = bookStmt.executeQuery();
+                if (bookResult.next()) {
+                    int bookId = bookResult.getInt("id");
+
+                    // Создаем запись в таблице user_books
+                    insertUserBook(connection, userId, bookId);
+                    System.out.println("Связь между пользователем и книгой успешно создана.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean userExists(String phone) {
+        String sql = "SELECT COUNT(*) FROM users WHERE phone = ?";
+        try (Connection connection = connect()) {
+            assert connection != null;
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, phone);
+                var resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;  // Если количество пользователей больше 0, значит, пользователь существует
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     // Метод для чтения файла JSON из resources
@@ -129,24 +219,32 @@ public class BookDatabase {
                 String isbn = book.getString("isbn");
                 String publisher = book.getString("publisher");
 
-                // Вставляем книгу, если ее нет
                 insertBookIfNotExists(conn, bookName, author, publishingYear, isbn, publisher);
+                // Связываем пользователя с книгой
+                linkUserWithBook(phone, isbn);
             }
         }
     }
 
-    public static void main(String[] args) {
-        // Загружаем данные из JSON файла в папке resources
-        String jsonData = readJsonFromFile();
-
-        // Подключаемся к базе данных
-        try (Connection conn = connect()) {
-            if (conn != null && jsonData != null) {
-                createTablesIfNotExist(conn);
-                insertDataFromJson(conn, jsonData);
+    // Метод для загрузки данных из файла JSON в базу данных
+    public static void loadDataFromJson() {
+        try (Connection connection = connect()) {
+            assert connection != null;
+            String jsonData = readJsonFromFile();
+            if (jsonData != null) {
+                insertDataFromJson(connection, jsonData);
             }
         } catch (SQLException e) {
-            System.out.println("Ошибка подключения к базе данных: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        try (Connection conn = connect()) {
+            createTablesIfNotExist(conn);  // Создание таблиц, если они не существуют
+            loadDataFromJson(); // Загрузка данных из JSON
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
