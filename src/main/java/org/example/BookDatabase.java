@@ -84,10 +84,10 @@ public class BookDatabase {
     }
 
     // Метод для чтения файла JSON из resources
-    private static String readJsonFromFile(String fileName) {
-        try (InputStream inputStream = BookDatabase.class.getClassLoader().getResourceAsStream(fileName)) {
+    private static String readJsonFromFile() {
+        try (InputStream inputStream = BookDatabase.class.getClassLoader().getResourceAsStream("books.json")) {
             if (inputStream == null) {
-                throw new IOException("Файл не найден: " + fileName);
+                throw new IOException("Файл не найден: " + "books.json");
             }
 
             // Преобразуем InputStream в строку
@@ -137,7 +137,7 @@ public class BookDatabase {
 
     public static void main(String[] args) {
         // Загружаем данные из JSON файла в папке resources
-        String jsonData = readJsonFromFile("books.json");
+        String jsonData = readJsonFromFile();
 
         // Подключаемся к базе данных
         try (Connection conn = connect()) {
