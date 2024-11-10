@@ -1,6 +1,10 @@
 package org.example;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Scanner;
+
+import static org.example.BookDatabase.loadDataFromJson;
 
 public class Main {
     public static void main(String[] args) {
@@ -12,11 +16,12 @@ public class Main {
             System.out.println("\n1 - Получить все музыкальные композиции");
             System.out.println("2 - Получить музыкальные композиции без букв 'm' и 't'");
             System.out.println("3 - Добавить свою любимую композицию");
-            System.out.println("4 - Получить все книги, отсортированные по году издания");
-            System.out.println("5 - Получить книги младше 2000 года");
-            System.out.println("6 - Ввести данные о себе и своих книгах");
-            System.out.println("7 - Удалить таблицы");
-            System.out.println("8 - Выход");
+            System.out.println("4 - Создать таблицы книг и посетителей");
+            System.out.println("5 - Получить все книги, отсортированные по году издания");
+            System.out.println("6 - Получить книги младше 2000 года");
+            System.out.println("7 - Ввести данные о себе и своих книгах");
+            System.out.println("8 - Удалить таблицы");
+            System.out.println("9 - Выход");
             System.out.println("Выберите действие:");
 
             int action = scanner.nextInt();
@@ -38,14 +43,22 @@ public class Main {
                     MusicQuery.insertFavoriteSong(favoriteSong);
                     break;
                 case 4:
+                    try (Connection connection = BookDatabase.connect()) {
+                        BookDatabase.createTablesIfNotExist(connection);
+                        loadDataFromJson();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 5:
                     // Вызов метода для получения всех книг, отсортированных по году издания
                     BookQuery.getBooksSortedByYear();
                     break;
-                case 5:
+                case 6:
                     // Вызов метода для получения книг младше 2000 года
                     BookQuery.getBooksYoungerThan2000();
                     break;
-                case 6:
+                case 7:
                     // Ввод данных о пользователе
                     System.out.println("Введите ваше имя:");
                     String name = scanner.nextLine();
@@ -109,17 +122,16 @@ public class Main {
                     }
                     break;
 
-                case 7:
+                case 8:
                     // Удаление таблиц
                     BookDatabase.deleteTables();
                     break;
 
-                case 8:
+                case 9:
                     // Выход из программы
                     System.out.println("Выход из программы.");
                     scanner.close();
                     return;
-
                 default:
                     System.out.println("Неверный выбор.");
             }

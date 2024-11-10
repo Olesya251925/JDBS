@@ -11,12 +11,12 @@ import java.io.IOException;
 public class BookDatabase {
 
     // Подключение к базе данных через класс DatabaseConnection
-    private static Connection connect() {
+    public static Connection connect() {
         return DatabaseConnection.connect(); // Используем метод connect из класса DatabaseConnection
     }
 
     // Создание таблиц, если они не существуют
-    private static void createTablesIfNotExist(Connection conn) {
+    public static void createTablesIfNotExist(Connection conn) {
         String createUsersTable = "CREATE TABLE IF NOT EXISTS users (" +
                 "id SERIAL PRIMARY KEY, " +
                 "name VARCHAR(100) NOT NULL, " +
@@ -304,12 +304,5 @@ public class BookDatabase {
         }
     }
 
-    public static void main(String[] args) {
-        try (Connection conn = connect()) {
-            createTablesIfNotExist(conn);  // Создание таблиц, если они не существуют
-            loadDataFromJson(); // Загрузка данных из JSON
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+
 }
