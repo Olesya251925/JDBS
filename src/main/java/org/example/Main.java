@@ -65,74 +65,13 @@ public class Main {
                     BookQuery.getBooksYoungerThan2000();
                     break;
                 case 8:
-                    // Ввод данных о пользователе
-                    System.out.println("Введите ваше имя:");
-                    String name = scanner.nextLine();
-                    System.out.println("Введите вашу фамилию:");
-                    String surname = scanner.nextLine();
-                    System.out.println("Введите ваш телефон:");
-                    String phone = scanner.nextLine();
-                    System.out.println("Вы подписаны на рассылку (true/false)?");
-                    boolean subscribed = scanner.nextBoolean();
-                    scanner.nextLine();  // Чтение новой строки
-
-                    if (BookDatabase.userExists(phone)) {
-                        System.out.println("Такой пользователь уже существует.");
-                        System.out.println("Хотите записать вашу любимую книгу? (да/нет)");
-
-                        String response = scanner.nextLine();
-                        if (response.equalsIgnoreCase("да")) {
-                            // Ввод данных о любимой книге
-                            System.out.println("Введите название вашей любимой книги:");
-                            String bookName = scanner.nextLine();
-                            System.out.println("Введите автора книги:");
-                            String author = scanner.nextLine();
-                            System.out.println("Введите год издания книги:");
-                            int year = scanner.nextInt();
-                            scanner.nextLine();  // Чтение новой строки
-                            System.out.println("Введите ISBN книги:");
-                            String isbn = scanner.nextLine();
-                            System.out.println("Введите издательство книги:");
-                            String publisher = scanner.nextLine();
-
-                            // Добавление книги и связывание с пользователем
-                            BookDatabase.addBook(bookName, author, year, isbn, publisher);
-                            BookDatabase.linkUserWithBook(phone, isbn);
-
-                            System.out.println("Ваша любимая книга добавлена в базу данных.");
-                            BookDatabase.getUserInfoWithBooks(phone);  // Вывод информации о пользователе и книгах
-                        }
-                    } else {
-                        // Добавление нового пользователя
-                        BookDatabase.addUser(name, surname, phone, subscribed);
-
-                        // Ввод данных о любимой книге
-                        System.out.println("Введите название вашей любимой книги:");
-                        String bookName = scanner.nextLine();
-                        System.out.println("Введите автора книги:");
-                        String author = scanner.nextLine();
-                        System.out.println("Введите год издания книги:");
-                        int year = scanner.nextInt();
-                        scanner.nextLine();  // Чтение новой строки
-                        System.out.println("Введите ISBN книги:");
-                        String isbn = scanner.nextLine();
-                        System.out.println("Введите издательство книги:");
-                        String publisher = scanner.nextLine();
-
-                        // Добавление книги и связывание с пользователем
-                        BookDatabase.addBook(bookName, author, year, isbn, publisher);
-                        BookDatabase.linkUserWithBook(phone, isbn);
-
-                        System.out.println("Ваши данные успешно внесены в базу данных.");
-                        BookDatabase.getUserInfoWithBooks(phone);  // Вывод информации о пользователе и книгах
-                    }
+                    // Ввод данных о пользователе и добавление книг
+                    handleUserData(scanner);
                     break;
-
                 case 9:
                     // Удаление таблиц
                     BookDatabase.deleteTables();
                     break;
-
                 case 10:
                     // Выход из программы
                     System.out.println("Выход из программы.");
@@ -142,5 +81,56 @@ public class Main {
                     System.out.println("Неверный выбор.");
             }
         }
+    }
+
+    private static void handleUserData(Scanner scanner) {
+        // Ввод данных о пользователе
+        System.out.println("Введите ваше имя:");
+        String name = scanner.nextLine();
+        System.out.println("Введите вашу фамилию:");
+        String surname = scanner.nextLine();
+        System.out.println("Введите ваш телефон:");
+        String phone = scanner.nextLine();
+        System.out.println("Вы подписаны на рассылку (true/false)?");
+        boolean subscribed = scanner.nextBoolean();
+        scanner.nextLine();  // Чтение новой строки
+
+        if (BookDatabase.userExists(phone)) {
+            System.out.println("Такой пользователь уже существует.");
+            System.out.println("Хотите записать вашу любимую книгу? (да/нет)");
+
+            String response = scanner.nextLine();
+            if (response.equalsIgnoreCase("да")) {
+                // Ввод данных о любимой книге и добавление в базу данных
+                addFavoriteBook(scanner, phone);
+            }
+        } else {
+            // Добавление нового пользователя
+            BookDatabase.addUser(name, surname, phone, subscribed);
+            // Ввод данных о любимой книге и добавление в базу данных
+            addFavoriteBook(scanner, phone);
+        }
+    }
+
+    private static void addFavoriteBook(Scanner scanner, String phone) {
+        // Ввод данных о любимой книге
+        System.out.println("Введите название вашей любимой книги:");
+        String bookName = scanner.nextLine();
+        System.out.println("Введите автора книги:");
+        String author = scanner.nextLine();
+        System.out.println("Введите год издания книги:");
+        int year = scanner.nextInt();
+        scanner.nextLine();  // Чтение новой строки
+        System.out.println("Введите ISBN книги:");
+        String isbn = scanner.nextLine();
+        System.out.println("Введите издательство книги:");
+        String publisher = scanner.nextLine();
+
+        // Добавление книги и связывание с пользователем
+        BookDatabase.addBook(bookName, author, year, isbn, publisher);
+        BookDatabase.linkUserWithBook(phone, isbn);
+
+        System.out.println("Ваша любимая книга добавлена в базу данных.");
+        BookDatabase.getUserInfoWithBooks(phone);  // Вывод информации о пользователе и книгах
     }
 }
