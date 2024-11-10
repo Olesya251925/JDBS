@@ -56,7 +56,6 @@ public class Main {
                     boolean subscribed = scanner.nextBoolean();
                     scanner.nextLine();  // Чтение новой строки
 
-                    // Проверка, существует ли уже пользователь
                     if (BookDatabase.userExists(phone)) {
                         System.out.println("Такой пользователь уже существует.");
                         System.out.println("Хотите записать вашу любимую книгу? (да/нет)");
@@ -76,13 +75,12 @@ public class Main {
                             System.out.println("Введите издательство книги:");
                             String publisher = scanner.nextLine();
 
-                            // Добавление книги в базу данных
+                            // Добавление книги и связывание с пользователем
                             BookDatabase.addBook(bookName, author, year, isbn, publisher);
-
-                            // Связывание книги с пользователем
                             BookDatabase.linkUserWithBook(phone, isbn);
 
                             System.out.println("Ваша любимая книга добавлена в базу данных.");
+                            BookDatabase.getUserInfoWithBooks(phone);  // Вывод информации о пользователе и книгах
                         }
                     } else {
                         // Добавление нового пользователя
@@ -101,16 +99,15 @@ public class Main {
                         System.out.println("Введите издательство книги:");
                         String publisher = scanner.nextLine();
 
-                        // Добавление книги в базу данных
+                        // Добавление книги и связывание с пользователем
                         BookDatabase.addBook(bookName, author, year, isbn, publisher);
-
-                        // Связывание книги с пользователем
                         BookDatabase.linkUserWithBook(phone, isbn);
 
-                        // Уведомление о завершении
                         System.out.println("Ваши данные успешно внесены в базу данных.");
+                        BookDatabase.getUserInfoWithBooks(phone);  // Вывод информации о пользователе и книгах
                     }
                     break;
+
                 case 7:
                     // Выход из программы
                     System.out.println("Выход из программы.");

@@ -239,6 +239,47 @@ public class BookDatabase {
         }
     }
 
+    public static void getUserInfoWithBooks(String phone) {
+        String userInfoQuery = "SELECT u.name, u.surname, u.phone, u.subscribed, b.name AS bookName, " +
+                "b.author, b.publishingYear, b.isbn, b.publisher " +
+                "FROM users u " +
+                "LEFT JOIN user_books ub ON u.id = ub.user_id " +
+                "LEFT JOIN books b ON ub.book_id = b.id " +
+                "WHERE u.phone = ?";
+
+        try (Connection connection = connect();
+             PreparedStatement pstmt = connection.prepareStatement(userInfoQuery)) {
+
+            pstmt.setString(1, phone);
+            ResultSet rs = pstmt.executeQuery();
+
+            boolean userFound = false;
+            while (rs.next()) {
+                if (!userFound) {
+                    System.out.println("\nИнформация о пользователе:");
+                    System.out.println("Имя: " + rs.getString("name"));
+                    System.out.println("Фамилия: " + rs.getString("surname"));
+                    System.out.println("Телефон: " + rs.getString("phone"));
+                    System.out.println("Подписан на рассылку: " + rs.getBoolean("subscribed"));
+                    userFound = true;
+                }
+                System.out.println("\nКнига:");
+                System.out.println("Название: " + rs.getString("bookName"));
+                System.out.println("Автор: " + rs.getString("author"));
+                System.out.println("Год издания: " + rs.getInt("publishingYear"));
+                System.out.println("ISBN: " + rs.getString("isbn"));
+                System.out.println("Издательство: " + rs.getString("publisher"));
+            }
+
+            if (!userFound) {
+                System.out.println("Пользователь с таким номером телефона не найден.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Ошибка при получении информации о пользователе и его книгах: " + e.getMessage());
+        }
+    }
+
+
     public static void main(String[] args) {
         try (Connection conn = connect()) {
             createTablesIfNotExist(conn);  // Создание таблиц, если они не существуют
