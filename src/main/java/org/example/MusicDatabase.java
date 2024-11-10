@@ -65,9 +65,4 @@ public class MusicDatabase {
         }
         return false;
     }
-
-    public static void main(String[] args) {
-        createMusicTable();
-        insertMusicData();
-    }
 }

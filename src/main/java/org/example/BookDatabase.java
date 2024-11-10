@@ -100,7 +100,7 @@ public class BookDatabase {
             pstmt.setInt(2, bookId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Ошибка при вставке связи пользователя с книгой: " + e.getMessage());
+
         }
     }
 
@@ -148,7 +148,6 @@ public class BookDatabase {
 
                     // Создаем запись в таблице user_books
                     insertUserBook(connection, userId, bookId);
-                    System.out.println("Связь между пользователем и книгой успешно создана.");
                 }
             }
         } catch (SQLException e) {
@@ -275,7 +274,7 @@ public class BookDatabase {
                 System.out.println("Пользователь с таким номером телефона не найден.");
             }
         } catch (SQLException e) {
-            System.out.println("Ошибка при получении информации о пользователе и его книгах: " + e.getMessage());
+
         }
     }
 
@@ -303,6 +302,4 @@ public class BookDatabase {
             System.out.println("Ошибка при удалении таблиц: " + e.getMessage());
         }
     }
-
-
 }
