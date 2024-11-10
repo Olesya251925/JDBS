@@ -279,6 +279,30 @@ public class BookDatabase {
         }
     }
 
+    public static void deleteTables() {
+        String deleteUserBooksTable = "DROP TABLE IF EXISTS user_books";
+        String deleteUsersTable = "DROP TABLE IF EXISTS users";
+        String deleteBooksTable = "DROP TABLE IF EXISTS books";
+
+        try (Connection connection = connect();
+             Statement stmt = connection.createStatement()) {
+
+            // Удаляем таблицу связей
+            stmt.executeUpdate(deleteUserBooksTable);
+            System.out.println("Таблица связей удалена.");
+
+            // Удаляем таблицу пользователей
+            stmt.executeUpdate(deleteUsersTable);
+            System.out.println("Таблица посетителей удалена.");
+
+            // Удаляем таблицу книг
+            stmt.executeUpdate(deleteBooksTable);
+            System.out.println("Таблица книг удалена.");
+
+        } catch (SQLException e) {
+            System.out.println("Ошибка при удалении таблиц: " + e.getMessage());
+        }
+    }
 
     public static void main(String[] args) {
         try (Connection conn = connect()) {

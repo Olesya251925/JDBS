@@ -15,7 +15,8 @@ public class Main {
             System.out.println("4 - Получить все книги, отсортированные по году издания");
             System.out.println("5 - Получить книги младше 2000 года");
             System.out.println("6 - Ввести данные о себе и своих книгах");
-            System.out.println("7 - Выход");
+            System.out.println("7 - Удалить таблицы");
+            System.out.println("8 - Выход");
             System.out.println("Выберите действие:");
 
             int action = scanner.nextInt();
@@ -109,10 +110,16 @@ public class Main {
                     break;
 
                 case 7:
+                    // Удаление таблиц
+                    BookDatabase.deleteTables();
+                    break;
+
+                case 8:
                     // Выход из программы
                     System.out.println("Выход из программы.");
                     scanner.close();
                     return;
+
                 default:
                     System.out.println("Неверный выбор.");
             }
