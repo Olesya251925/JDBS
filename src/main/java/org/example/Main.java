@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import static org.example.BookDatabase.loadDataFromJson;
+import static org.example.JsonDataLoader.loadDataFromJson;
 
 public class Main {
     public static void main(String[] args) {

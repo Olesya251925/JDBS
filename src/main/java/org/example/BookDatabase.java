@@ -1,12 +1,6 @@
 package org.example;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class BookDatabase {
 
@@ -50,7 +44,7 @@ public class BookDatabase {
     }
 
     // Вставка пользователя, если его нет
-    private static void insertUserIfNotExists(Connection conn, String name, String surname, String phone, boolean subscribed) {
+    public static void insertUserIfNotExists(Connection conn, String name, String surname, String phone, boolean subscribed) {
         String insertUser = "INSERT INTO users (name, surname, phone, subscribed) " +
                 "SELECT ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM users WHERE phone = ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(insertUser)) {
@@ -71,7 +65,7 @@ public class BookDatabase {
     }
 
     // Вставка книги, если она не существует
-    private static void insertBookIfNotExists(Connection conn, String name, String author, int publishingYear, String isbn, String publisher) {
+    public static void insertBookIfNotExists(Connection conn, String name, String author, int publishingYear, String isbn, String publisher) {
         String insertBook = "INSERT INTO books (name, author, publishingYear, isbn, publisher) " +
                 "SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM books WHERE isbn = ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(insertBook)) {
@@ -99,7 +93,7 @@ public class BookDatabase {
             pstmt.setInt(1, userId);
             pstmt.setInt(2, bookId);
             pstmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException ignored) {
 
         }
     }
@@ -172,71 +166,6 @@ public class BookDatabase {
         return false;
     }
 
-    // Метод для чтения файла JSON из resources
-    private static String readJsonFromFile() {
-        try (InputStream inputStream = BookDatabase.class.getClassLoader().getResourceAsStream("books.json")) {
-            if (inputStream == null) {
-                throw new IOException("Файл не найден: " + "books.json");
-            }
-
-            // Преобразуем InputStream в строку
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            int nRead;
-            byte[] buffer = new byte[1024];
-            while ((nRead = inputStream.read(buffer, 0, buffer.length)) != -1) {
-                byteArrayOutputStream.write(buffer, 0, nRead);
-            }
-
-            return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            System.out.println("Ошибка при чтении JSON файла: " + e.getMessage());
-            return null;
-        }
-    }
-
-    // Вставка данных из JSON
-    private static void insertDataFromJson(Connection conn, String jsonData) {
-        JSONArray users = new JSONArray(jsonData);
-
-        for (int i = 0; i < users.length(); i++) {
-            JSONObject user = users.getJSONObject(i);
-            String name = user.getString("name");
-            String surname = user.getString("surname");
-            String phone = user.getString("phone");
-            boolean subscribed = user.getBoolean("subscribed");
-
-            // Вставляем пользователя, если его нет
-            insertUserIfNotExists(conn, name, surname, phone, subscribed);
-
-            // Вставляем книги, если их нет
-            JSONArray favoriteBooks = user.getJSONArray("favoriteBooks");
-            for (int j = 0; j < favoriteBooks.length(); j++) {
-                JSONObject book = favoriteBooks.getJSONObject(j);
-                String bookName = book.getString("name");
-                String author = book.getString("author");
-                int publishingYear = book.getInt("publishingYear");
-                String isbn = book.getString("isbn");
-                String publisher = book.getString("publisher");
-
-                insertBookIfNotExists(conn, bookName, author, publishingYear, isbn, publisher);
-                // Связываем пользователя с книгой
-                linkUserWithBook(phone, isbn);
-            }
-        }
-    }
-
-    // Метод для загрузки данных из файла JSON в базу данных
-    public static void loadDataFromJson() {
-        try (Connection connection = connect()) {
-            assert connection != null;
-            String jsonData = readJsonFromFile();
-            if (jsonData != null) {
-                insertDataFromJson(connection, jsonData);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void getUserInfoWithBooks(String phone) {
         String userInfoQuery = "SELECT u.name, u.surname, u.phone, u.subscribed, b.name AS bookName, " +
@@ -273,9 +202,13 @@ public class BookDatabase {
             if (!userFound) {
                 System.out.println("Пользователь с таким номером телефона не найден.");
             }
-        } catch (SQLException e) {
+        } catch (SQLException ignored) {
 
         }
+    }
+
+    public static void loadJsonData() {
+        JsonDataLoader.loadDataFromJson();
     }
 
     public static void deleteTables() {
