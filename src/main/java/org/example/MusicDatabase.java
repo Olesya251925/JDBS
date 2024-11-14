@@ -16,7 +16,7 @@ public class MusicDatabase {
 
         try (Connection connection = DatabaseConnection.connect();
              Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(createTableSQL);
+            stmt.executeUpdate(createTableSQL);  // Выполняем запрос на создание таблицы
             System.out.println("Таблица music успешно создана или уже существует.");
         } catch (SQLException e) {
             System.out.println("Ошибка при создании таблицы: " + e.getMessage());
@@ -33,12 +33,12 @@ public class MusicDatabase {
         };
 
         try (Connection connection = DatabaseConnection.connect()) {
-            for (String song : musicData) {
-                if (!isSongExists(connection, song)) {
+            for (String song : musicData) { // Проходим по каждому названию песни
+                if (!isSongExists(connection, song)) { // Проверяем, существует ли песня в таблице
                     String insertSQL = "INSERT INTO music (name) VALUES (?);";
                     try (PreparedStatement stmt = connection.prepareStatement(insertSQL)) {
-                        stmt.setString(1, song);
-                        stmt.executeUpdate();
+                        stmt.setString(1, song); // Устанавливаем значение для первого параметра запроса
+                        stmt.executeUpdate();  // Выполняем запрос на вставку
                         System.out.println("Добавлена песня: " + song);
                     } catch (SQLException e) {
                         System.out.println("Ошибка при вставке данных: " + e.getMessage());
@@ -54,10 +54,10 @@ public class MusicDatabase {
 
     // Метод для проверки существования песни в базе данных
     private static boolean isSongExists(Connection connection, String songName) throws SQLException {
-        String checkSQL = "SELECT COUNT(*) FROM music WHERE name = ?;";
+        String checkSQL = "SELECT COUNT(*) FROM music WHERE name = ?;";  // SQL-запрос на проверку существования песни
         try (PreparedStatement stmt = connection.prepareStatement(checkSQL)) {
             stmt.setString(1, songName);
-            try (ResultSet resultSet = stmt.executeQuery()) {
+            try (ResultSet resultSet = stmt.executeQuery()) {  // Выполняем запрос и получаем результат
                 if (resultSet.next()) {
                     return resultSet.getInt(1) > 0; // Если строка существует, вернется больше 0
                 }

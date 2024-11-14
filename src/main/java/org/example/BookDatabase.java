@@ -34,6 +34,7 @@ public class BookDatabase {
                 "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, " +
                 "FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE)";
 
+        // Выполнение SQL-запросов для создания таблиц
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(createUsersTable);
             stmt.execute(createBooksTable);
@@ -134,9 +135,9 @@ public class BookDatabase {
                 int userId = userResult.getInt("id");
 
                 // Получаем book_id по ISBN
-                PreparedStatement bookStmt = connection.prepareStatement(getBookIdQuery);
+                PreparedStatement bookStmt = connection.prepareStatement(getBookIdQuery); // передаем строку
                 bookStmt.setString(1, isbn);
-                var bookResult = bookStmt.executeQuery();
+                var bookResult = bookStmt.executeQuery(); // выполняем запрос
                 if (bookResult.next()) {
                     int bookId = bookResult.getInt("id");
 
@@ -149,6 +150,7 @@ public class BookDatabase {
         }
     }
 
+    //проверяет, существует ли пользователь с указанным номером телефона
     public static boolean userExists(String phone) {
         String sql = "SELECT COUNT(*) FROM users WHERE phone = ?";
         try (Connection connection = connect()) {
@@ -166,7 +168,7 @@ public class BookDatabase {
         return false;
     }
 
-
+    // извлекает информацию о пользователе и книгах
     public static void getUserInfoWithBooks(String phone) {
         String userInfoQuery = "SELECT u.name, u.surname, u.phone, u.subscribed, b.name AS bookName, " +
                 "b.author, b.publishingYear, b.isbn, b.publisher " +
@@ -211,6 +213,7 @@ public class BookDatabase {
         JsonDataLoader.loadDataFromJson();
     }
 
+    // удаление таблиц
     public static void deleteTables() {
         String deleteUserBooksTable = "DROP TABLE IF EXISTS user_books";
         String deleteUsersTable = "DROP TABLE IF EXISTS users";
